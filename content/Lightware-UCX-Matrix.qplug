@@ -1,7 +1,7 @@
 PluginInfo = {
-    Name = "Lightware~UCX Matrix (1.0.0.0)", -- The tilde here indicates folder structure in the Shematic Elements pane
-    Version = "1.0.0.1",
-    Id = "qsys.lightware.ucx.1.0.0.0", -- show this is just a unique id. Show some commented out 'fun' unique ids
+    Name = "Lightware~UCX Matrix (2.0.0.)", -- The tilde here indicates folder structure in the Shematic Elements pane
+    Version = "2.0.0.0",
+    Id = "qsys.lightware.ucx", -- show this is just a unique id. Show some commented out 'fun' unique ids
     Description = "Control for Lightware UCX range of Video Matrices",
     ShowDebug = false,
     Author = "Isaac Porter"
@@ -40,6 +40,12 @@ function GetProperties()
             Type = "enum",
             Choices = {"UCX-2x1", "UCX-4x2"},
             Value = "UCX-4x2"
+        },
+        {
+            Name = "Connection Type",
+            Type = "enum",
+            Choices = {"TCP", "WS", "WSS"},
+            Value = "TCP"
         }
         --[[ -- for future use
             {
@@ -395,10 +401,7 @@ if Controls then
     }
 
     -- Build a Client
-    conn = TcpSocket.New()
-    conn.ReadTimeout = 0
-    conn.WriteTimeout = 0
-    conn.ReconnectTimeout = 5
+    conn = {}
 
     -- Create and setup the Communications Timeout
     timerComms = Timer.New()
@@ -406,7 +409,11 @@ if Controls then
         timer:Stop()
         Controls.online.Boolean = false
         print("Connection Timed Out")
-        conn:Disconnect()
+        if connMethod == "TCP" then 
+            conn:Disconnect()
+        else
+            conn:Close()
+        end
         fnConnect()
     end
 
@@ -433,7 +440,11 @@ if Controls then
         local toSend = cmd .. " " .. arg
         -- Send to device
         print("-->LW::" ..toSend)
-        conn:Write(toSend .. "\x0D\x0A")
+        if connMethod == "TCP" then 
+            conn:Write(toSend .. "\x0D\x0A")
+        else
+            conn:Send(toSend .. "\x0D\x0A")
+        end
         -- Reset Polling
         fnInitPoll()
     end
@@ -574,11 +585,22 @@ if Controls then
         connMethod = Properties["Connection Type"].Value
         if Properties["IP Address"].Value ~= "" then
             LW3.Host = Properties["IP Address"].Value
-            fnConnect()
         else
             print("IP Address Property Not Set")
         end
+
+        -- Create conn method based off of Property
+        if connMethod == "TCP" then 
+            conn = TcpSocket.New()
+            conn.ReadTimeout = 0
+            conn.WriteTimeout = 0
+            conn.ReconnectTimeout = 5
+        else
+            conn = WebSocket.New()
+        end
+        fnConnect()
     end
+
 
     for i = 1, output_count do
         Controls["output_" .. i].EventHandler = function()
