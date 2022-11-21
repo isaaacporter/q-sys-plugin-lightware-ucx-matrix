@@ -1,4 +1,4 @@
-# Q-SYS Plugin: Lightware MMX2 Matrix
+# Q-SYS Plugin: Lightware UCX Matrix
 
 QSC Q-Sys plugin for [Lightware](https://lightware.com/) Taurus UCX Matrix devices via IP.
 
