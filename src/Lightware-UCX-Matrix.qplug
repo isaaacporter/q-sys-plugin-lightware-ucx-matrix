@@ -1,7 +1,7 @@
 PluginInfo = {
-    Name = "Lightware~UCX Matrix (1.0.0.0)", -- The tilde here indicates folder structure in the Shematic Elements pane
-    Version = "1.0.0.1",
-    Id = "qsys.lightware.ucx.1.0.0.0", -- show this is just a unique id. Show some commented out 'fun' unique ids
+    Name = "Lightware~UCX Matrix v1.1", -- The tilde here indicates folder structure in the Shematic Elements pane
+    Version = "1.1.0.0",
+    Id = "be5d626d-247e-4061-affa-f8ae80dab9eb", -- show this is just a unique id. Show some commented out 'fun' unique ids
     Description = "Control for Lightware UCX range of Video Matrices",
     ShowDebug = false,
     Author = "Isaac Porter"
@@ -41,12 +41,6 @@ function GetProperties()
             Choices = {"UCX-2x1", "UCX-4x2"},
             Value = "UCX-4x2"
         }
-        --[[ -- for future use
-            {
-            Name = "Independent Audio",
-            Type = "boolean",
-            Value = false
-        },]]
     }
     return props
 end
@@ -480,13 +474,7 @@ if Controls then
     function fnConnect()
         print("Plugin Connecting")
         -- Open Connection
-        if connMethod == "TCP" then 
-            conn:Connect(LW3.Host, LW3.Port)
-        elseif connMethod == "WS" then 
-            conn:Connect("ws", LW3.Host, "/lw3", 80)
-        elseif connMethod == "WSS" then 
-            conn:Connect("wss", LW3.Host, "/lw3", 443)
-        end
+        conn:Connect(LW3.Host, LW3.Port)
         -- Set IP address value
         if Controls.ip_address then
             Controls.ip_address.String = LW3.Host .. ":" .. LW3.Port
@@ -571,7 +559,6 @@ if Controls then
 
     -- Set IP address from Properties if present
     if Properties then
-        connMethod = Properties["Connection Type"].Value
         if Properties["IP Address"].Value ~= "" then
             LW3.Host = Properties["IP Address"].Value
             fnConnect()
